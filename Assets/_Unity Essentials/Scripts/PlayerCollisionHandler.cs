@@ -6,6 +6,8 @@ using UnityEngine;
 
 // Require the movement script to apply power-up effects
 [RequireComponent(typeof(StarterAssets.CorridorRunnerMovement))]
+
+
 public class PlayerCollisionHandler : MonoBehaviour
 {
     [Header("Effects (Optional)")]
@@ -119,9 +121,12 @@ public class PlayerCollisionHandler : MonoBehaviour
                         break;
                     case PowerUp.PowerUpType.CollisionProof:
                         movementScript?.ActivateCollisionProof();
+                        UIManager.Instance?.AddScore(100);
+                         UIManager.Instance?.UpdateResistanceON();
                         break;
                     case PowerUp.PowerUpType.CameraAngle:
                         movementScript?.ActivateCameraAngleChange();
+                        UIManager.Instance?.AddScore(300);
                         break;
                 }
 

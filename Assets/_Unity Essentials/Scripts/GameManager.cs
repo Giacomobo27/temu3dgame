@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour
     [Header("UI References (Optional)")]
 
     public GameObject playingUI; // e.g., Score, HUD elements
-    public GameObject gameOverUI;
 
     [Header("Other References")]
     public GameObject playerObject; // Assign the player GameObject
@@ -89,7 +88,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game State changed to: " + currentState);
 
         playingUI?.SetActive(currentState == GameState.Playing);
-        gameOverUI?.SetActive(currentState == GameState.GameOver);
 
         switch (currentState)
         {

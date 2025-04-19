@@ -447,12 +447,24 @@ private IEnumerator CollisionProofCoroutine()
     isCollisionProof = true;
     Debug.Log("APPLE Activated! Collision consequences ignored.");
 
+     if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateResistanceON(); // Tell UI effect is active
+        }
+        else { Debug.LogWarning("UIManager instance not found when trying to call UpdateResistanceON."); }
+        // -----------------
+
     // TODO: Add visual feedback (e.g., shield effect, color tint?)
 
     yield return new WaitForSeconds(invulnerabilityDuration); // Use the duration variable
 
     isCollisionProof = false;
     Debug.Log("APPLE Deactivated. Collisions are deadly again.");
+     if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateResistanceOFF(); // Tell UI effect is inactive
+        }
+         else { Debug.LogWarning("UIManager instance not found when trying to call UpdateResistanceOFF."); }
 
     // TODO: Remove visual feedback
 }
