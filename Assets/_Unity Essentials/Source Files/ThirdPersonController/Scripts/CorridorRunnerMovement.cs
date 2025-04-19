@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections; // Required for Coroutines
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem; // Keep this if StarterAssetsInputs uses it
 #endif
@@ -9,6 +10,33 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
     [RequireComponent(typeof(StarterAssetsInputs))] // We rely on this for input values
     public class CorridorRunnerMovement : MonoBehaviour
     {
+         #region PowerUp Variables
+
+        [Header("PowerUp Settings")]
+        // Potion
+        public float potionSpeedMultiplier = 1.5f;
+        public float potionJumpMultiplier = 1.3f;
+        public float potionDuration = 8.0f;
+        // Apple
+        public float intangibilityDuration = 5.0f; // Duration from assignment
+        // Coin
+        public float cameraAnglePowerUpValue = 0.0f; 
+        public float cameraAnglePowerUpDuration = 10.0f;
+
+
+        // Internal PowerUp State
+        public float invulnerabilityDuration = 5.0f; 
+        private bool isPotionActive = false;
+        private float originalSpeed;
+        private float originalJumpHeight;
+        private bool isCollisionProof = false; // Tracks apple effect
+
+     
+        private bool isCameraPowerUpActive = false;
+        private float originalCameraAngleOverride;
+
+        #endregion
+
         #region Public Variables (Inspector)
 
         [Header("Runner Movement")]
@@ -112,6 +140,7 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+
         }
 
         void Update()
@@ -361,6 +390,113 @@ private void JumpAndGravity()
         }
 
         #endregion
+
+
+         #region PowerUp Activation Methods
+
+        // --- POTION ---
+        public void ActivateSpeedJumpBoost()
+        {
+            if (!isPotionActive) // Prevent stacking multiple potions right now
+            {
+                StartCoroutine(SpeedJumpBoostCoroutine());
+            }
+            // Optional: Could reset timer if already active
+        }
+
+        private IEnumerator SpeedJumpBoostCoroutine()
+        {
+            isPotionActive = true;
+            // Store original values
+            originalSpeed = ForwardSpeed;
+            originalJumpHeight = JumpHeight;
+
+            // Apply boost
+            ForwardSpeed *= potionSpeedMultiplier;
+            JumpHeight *= potionJumpMultiplier;
+            Debug.Log($"POTION Activated! Speed: {ForwardSpeed}, Jump: {JumpHeight}");
+
+            // TODO: Add optional visual/audio feedback for potion start
+
+            // Wait for the duration
+            yield return new WaitForSeconds(potionDuration);
+
+            // Restore original values
+            ForwardSpeed = originalSpeed;
+            JumpHeight = originalJumpHeight;
+            isPotionActive = false;
+            Debug.Log("POTION Deactivated. Speed/Jump restored.");
+
+            // TODO: Add optional visual/audio feedback for potion end
+        }
+
+
+        // --- APPLE ---
+        public bool IsCollisionProof => isCollisionProof; // Read-only property
+
+public void ActivateCollisionProof() // Renamed activation method
+{
+     // Allow restarting the timer if already active
+     // Stop any previous coroutine first to prevent conflicts
+     StopCoroutine(nameof(CollisionProofCoroutine));
+     StartCoroutine(CollisionProofCoroutine());
+}
+
+private IEnumerator CollisionProofCoroutine()
+{
+    isCollisionProof = true;
+    Debug.Log("APPLE Activated! Collision consequences ignored.");
+
+    // TODO: Add visual feedback (e.g., shield effect, color tint?)
+
+    yield return new WaitForSeconds(invulnerabilityDuration); // Use the duration variable
+
+    isCollisionProof = false;
+    Debug.Log("APPLE Deactivated. Collisions are deadly again.");
+
+    // TODO: Remove visual feedback
+}
+        
+        // --- COIN ---
+         public void ActivateCameraAngleChange()
+         {
+             if (!isCameraPowerUpActive)
+             {
+                StartCoroutine(CameraAngleCoroutine());
+             }
+         }
+
+         private IEnumerator CameraAngleCoroutine()
+         {
+            isCameraPowerUpActive = true;
+            originalCameraAngleOverride = CameraAngleOverride; // Store current override
+            float rnumber= Random.value;
+            if(rnumber> 0.5f){
+            CameraAngleOverride += cameraAnglePowerUpValue; 
+            }
+            else{
+                CameraAngleOverride -= cameraAnglePowerUpValue; 
+            }
+            // Or set directly: CameraAngleOverride = cameraAnglePowerUpValue;
+            Debug.Log($"COIN Activated! Camera Angle Override now: {CameraAngleOverride}");
+
+            // TODO: Add camera transition effect? Sound?
+
+            yield return new WaitForSeconds(cameraAnglePowerUpDuration);
+
+            CameraAngleOverride = originalCameraAngleOverride; // Restore original override
+            isCameraPowerUpActive = false;
+            Debug.Log("COIN Deactivated. Camera Angle restored.");
+         }
+
+        #endregion
+
+
+
+
+
+
+
 
         #region Gizmos
 

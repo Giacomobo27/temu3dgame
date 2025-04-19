@@ -8,6 +8,7 @@ TagManager:
   - Dirt
   - CinemachineTarget
   - Obstacle
+  - PowerUp
   layers:
   - Default
   - TransparentFX

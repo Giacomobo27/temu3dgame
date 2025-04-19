@@ -3,6 +3,11 @@ using System.Collections.Generic; // Required for using Lists or Queues
 
 public class CorridorGenerator : MonoBehaviour
 {
+    [Header("PowerUp Settings")] // Add near Obstacle Settings
+public GameObject[] powerUpPrefabs;
+[Range(0f, 1f)]
+public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
+
     [Header("Corridor Settings")]
     public GameObject corridorSectionPrefab;
     public float sectionLength = 12f; // *** RE-VERIFY THIS VALUE IS ACCURATE ***
@@ -87,14 +92,18 @@ public class CorridorGenerator : MonoBehaviour
         // Add it to our tracking queue
         activeSections.Enqueue(newSection);
 
-        
+        if(!isFirstSection){
         // --- Try to Spawn an Obstacle in the new section ---
-        // Only attempt if not the very first section and probability allows
-        if (!isFirstSection && Random.value < obstacleSpawnProbability)
+        float rnumber= Random.value;
+        if (rnumber < obstacleSpawnProbability)
         {
              TrySpawnObstacle(newSection);
         }
-        // ----------------------------------------------------
+        else if (rnumber < obstacleSpawnProbability + powerUpSpawnProbability) {
+            TrySpawnPowerUp(newSection); 
+        }
+        }
+      
 
 
 
@@ -141,6 +150,34 @@ public class CorridorGenerator : MonoBehaviour
              Debug.LogWarning($"Obstacle prefab at index {prefabIndex} is null.");
         }
      }
+
+      void TrySpawnPowerUp(GameObject sectionInstance)
+ {
+    // Check if we have power-up prefabs
+    if (powerUpPrefabs == null || powerUpPrefabs.Length == 0) return;
+
+    // Find spawn points (reuse obstacle points or make specific ones)
+    ObstacleSpawnPoint[] spawnPoints = sectionInstance.GetComponentsInChildren<ObstacleSpawnPoint>();
+    if (spawnPoints == null || spawnPoints.Length == 0) return;
+
+    // --- Spawn Logic ---
+    // 1. Select a random spawn point
+    // CONSIDER: Maybe avoid spawning on the same point as an obstacle? Needs extra logic.
+    int spawnIndex = Random.Range(0, spawnPoints.Length);
+    Transform spawnTransform = spawnPoints[spawnIndex].transform;
+
+    // 2. Select a random power-up prefab
+    int prefabIndex = Random.Range(0, powerUpPrefabs.Length);
+    GameObject powerUpToSpawn = powerUpPrefabs[prefabIndex];
+
+    // 3. Instantiate
+    if (powerUpToSpawn != null) {
+        Instantiate(powerUpToSpawn, spawnTransform.position, spawnTransform.rotation, sectionInstance.transform);
+         // Debug.Log($"Spawned power-up {powerUpToSpawn.name} in section {sectionInstance.name}");
+    } else {
+         Debug.LogWarning($"PowerUp prefab at index {prefabIndex} is null.");
+    }
+ }
 
 
 
