@@ -1,0 +1,66 @@
+# Unity Generated Files and Folders #
+#####################################
+
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Mm]emoryCaptures/
+/[Uu]serSettings/
+/[Rr]ecordings/
+
+# Build Output Folders #
+########################
+/[Bb]uild/
+/[Bb]uilds/
+/[Ww]ebGL builds/ # Specifically ignore your WebGL build folder name
+/[Ww]eb[Gg][Ll]_[Bb]uild*/ # Ignore variations like WebGL_Build_01
+/[Aa]ndroid_[Bb]uild*/
+/[Ww]indows_[Bb]uild*/
+/[Ss]tandalone[Bb]uild*/
+
+# Build Output Files #
+######################
+*.apk
+*.aab
+*.ipa
+*.unitypackage
+*.app
+*.exe
+*.pdb # Often alongside exe on Windows
+
+# VS/Rider/VSCode Rider Temporary Files #
+###############################
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb.mdb
+*.opendb
+*.VC.db
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Crash reports #
+#################
+**/CrashReport-*/
+
+# Plastic SCM / Unity Version Control temporary files #
+#######################################################
+*.private
