@@ -58,7 +58,7 @@ Builds for Windows, Android, and WebGL can be found under the **Releases** tab o
     4.  You may need to allow installation from "Unknown Sources" in your device's security settings.
     5.  Follow the prompts to install the game.
 *   **WebGL:**
-    1.  A playable version is hosted via GitHub Pages here: **[Link to your GitHub Pages URL]**
+    1.  A playable version is hosted via GitHub Pages here: **https://giacomobo27.github.io/temu3dgame/**
     2.  Simply visit the link in a compatible web browser (Chrome, Firefox, Edge recommended). Loading may take some time.
 
 ## Building from Source
