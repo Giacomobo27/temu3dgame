@@ -3,7 +3,13 @@ using System.Collections.Generic; // Required for using Lists or Queues
 
 public class CorridorGenerator : MonoBehaviour
 {
-    [Header("PowerUp Settings")] // Add near Obstacle Settings
+    //public variables
+
+    [Header("Level Progression Corridors")]
+[Tooltip("Corridor prefabs for each level (Level 1, Level 2, Level 3)")]
+public GameObject[] corridorPrefabsByLevel = new GameObject[3];
+
+    [Header("PowerUp Settings")] 
 public GameObject[] powerUpPrefabs;
 [Range(0f, 1f)]
 public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
@@ -29,7 +35,7 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     private Queue<GameObject> activeSections = new Queue<GameObject>();
     private Vector3 nextSpawnPosition = Vector3.zero;
     private float currentTriggerSpawnZ = float.MinValue; // Store the calculated trigger Z
-
+    private GameManager gameManager; 
     void Start()
     {
         // --- Error Checking (Keep this) ---
@@ -53,6 +59,9 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
             Debug.LogWarning("CorridorGenerator: No obstacle prefabs assigned. No obstacles will spawn.", this);
         }
         // --- End Error Checking ---
+
+        gameManager = GameManager.Instance;
+     if (gameManager == null) Debug.LogWarning("CorridorGenerator: GameManager not found!", this);
 
         // Initialize starting position
         nextSpawnPosition = transform.position; // Start at the generator's origin
@@ -86,11 +95,42 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     }
     void SpawnSection(bool isFirstSection = false)
     {
-        if (corridorSectionPrefab == null) return;
-        // Instantiate the new section
-        GameObject newSection = Instantiate(corridorSectionPrefab, nextSpawnPosition, Quaternion.identity, transform);
-        // Add it to our tracking queue
-        activeSections.Enqueue(newSection);
+
+         // --- Determine Prefab based on Level ---
+    GameObject prefabToSpawn = corridorSectionPrefab; // Default fallback
+
+    if (gameManager != null && corridorPrefabsByLevel != null)
+    {
+        // Get the prefab for the current level
+        // Make sure array elements are not null in Inspector!
+        GameObject levelPrefab = corridorPrefabsByLevel[(int)gameManager.CurrentLevel];
+        if (levelPrefab != null) {
+            prefabToSpawn = levelPrefab;
+        } else {
+            // Warn if specific level prefab is missing, use default
+            Debug.LogWarning($"Corridor prefab for Level {(int)gameManager.CurrentLevel + 1} is not assigned! Using default.", this);
+        }
+    }
+     else if(corridorPrefabsByLevel == null || corridorPrefabsByLevel.Length < 3)
+    {
+        if(Time.frameCount % 120 == 0) // Log periodically
+            Debug.LogWarning("corridorPrefabsByLevel array not configured correctly in Inspector! Using default.", this);
+    }
+
+
+    if (prefabToSpawn == null) { // Final check if default is also null
+        Debug.LogError("No valid corridor prefab found to spawn!", this);
+        return;
+    }
+
+    // Instantiate the chosen section prefab
+    GameObject newSection = Instantiate(prefabToSpawn, nextSpawnPosition, Quaternion.identity, transform);
+    activeSections.Enqueue(newSection);
+
+
+
+
+
 
         if(!isFirstSection){
         // --- Try to Spawn an Obstacle in the new section ---

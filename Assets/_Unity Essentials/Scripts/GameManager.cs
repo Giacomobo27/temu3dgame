@@ -31,12 +31,24 @@ public class GameManager : MonoBehaviour
         GameOver    // Player has lost
     }
 
+      // 
+    public enum GameLevel { Level1, Level2, Level3 }
+    [Header("Level Progression")]
+    [Tooltip("Read-only view of the current level")]
+    [SerializeField] // Show in inspector but not editable directly
+    private GameLevel currentLevel = GameLevel.Level1;
+    public GameLevel CurrentLevel => currentLevel; // Public read-only property
+
+    // Score thresholds for level changes
+    public int level2Threshold = 1000;
+    public int level3Threshold = 2000;
+    // --- END LEVEL TRACKING ---
+
     [Header("Game State")]
     public GameState currentState = GameState.Playing;
 
     [Header("UI References (Optional)")]
 
-    public GameObject playingUI; // e.g., Score, HUD elements
 
     [Header("Other References")]
     public GameObject playerObject; // Assign the player GameObject
@@ -45,7 +57,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // Initial setup based on the starting state
-        SetState(GameState.Playing); // Start in the Ready state
+        //SetState(GameState.Playing); // Start in the Ready state
+         UpdateLevel(true);
 
         if (playerObject == null) {
              // Try to find the player automatically if not assigned (optional)
@@ -60,6 +73,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        UpdateLevel();
         // Handle input based on the current state
         switch (currentState)
         {
@@ -87,8 +101,6 @@ public class GameManager : MonoBehaviour
         currentState = newState;
         Debug.Log("Game State changed to: " + currentState);
 
-        playingUI?.SetActive(currentState == GameState.Playing);
-
         switch (currentState)
         {
 
@@ -112,6 +124,42 @@ public class GameManager : MonoBehaviour
             SetState(GameState.Playing);
     
     }
+
+    
+    // --- ADD UpdateLevel Method ---
+    private void UpdateLevel(bool forceUpdate = false)
+    {
+        // Check if UIManager exists and we can get the score
+        if (UIManager.Instance == null) return;
+
+        int score = UIManager.Instance.CurrentScore;
+        GameLevel calculatedLevel;
+
+        // Determine level based on score thresholds
+        if (score >= level3Threshold)
+        {
+            calculatedLevel = GameLevel.Level3;
+        }
+        else if (score >= level2Threshold)
+        {
+            calculatedLevel = GameLevel.Level2;
+        }
+        else
+        {
+            calculatedLevel = GameLevel.Level1;
+        }
+
+        // Update level only if it changed (or if forced)
+        if (calculatedLevel != currentLevel || forceUpdate)
+        {
+            currentLevel = calculatedLevel;
+            Debug.Log($"--- Level Changed to: {currentLevel} (Score: {score}) ---");
+            // Optional: Trigger an event here if other scripts need to react instantly
+            // OnLevelChanged?.Invoke(currentLevel);
+        }
+    }
+    // --- END UpdateLevel Method ---
+
 
     // Call this method from your player script when it dies/collides
     public void PlayerDied()

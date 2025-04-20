@@ -122,7 +122,6 @@ public class PlayerCollisionHandler : MonoBehaviour
                     case PowerUp.PowerUpType.CollisionProof:
                         movementScript?.ActivateCollisionProof();
                         UIManager.Instance?.AddScore(100);
-                         UIManager.Instance?.UpdateResistanceON();
                         break;
                     case PowerUp.PowerUpType.CameraAngle:
                         movementScript?.ActivateCameraAngleChange();

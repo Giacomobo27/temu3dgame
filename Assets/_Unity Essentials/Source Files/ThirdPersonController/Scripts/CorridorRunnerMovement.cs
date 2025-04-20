@@ -40,12 +40,17 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         #region Public Variables (Inspector)
 
         [Header("Runner Movement")]
-        public float ForwardSpeed = 5.0f;
+        public float ForwardSpeed = 7.0f;
         public float SidewaysSpeed = 4.0f;
         public float SprintSpeedMultiplier = 1.5f;
         public float SidewaysSpeedChangeRate = 10.0f;
         // [Tooltip("Multiplier for forward speed when moving backwards input is held (S key)")] // Optional Braking
-        // public float BrakingSpeedMultiplier = 0.5f;
+        // public float BrakingSpeedMultiplier = 0.5f; 
+        [Header("Level Progression Speed")]
+        [Tooltip("Forward speed for each level (Level 1, Level 2, Level 3)")]
+        public float[] forwardSpeedsByLevel = new float[3] { 7.0f, 13.0f, 15.0f }; // Default example speeds
+
+        
 
 
         [Header("Jump and Gravity")]
@@ -94,6 +99,7 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
         private float _currentSidewaysSpeed;
+        private float currentActualForwardSpeed; // Stores the calculated speed for use by MovePlayer
 
         // Timeouts
         private float _jumpTimeoutDelta;
@@ -113,7 +119,7 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
 
         void Awake()
         {
-              _gameManager = FindFirstObjectByType<GameManager>(); // <<< THE CHANGED LINE
+              _gameManager = FindFirstObjectByType<GameManager>(); 
 
     // Keep the null check, it's still useful
     if (_gameManager == null) {
@@ -135,6 +141,16 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
                  Debug.LogError("Cinemachine Camera Target not assigned!", this);
                  enabled = false; return;
             }
+
+            if (_gameManager != null && forwardSpeedsByLevel != null && forwardSpeedsByLevel.Length > (int)_gameManager.CurrentLevel) {
+             currentActualForwardSpeed = forwardSpeedsByLevel[(int)_gameManager.CurrentLevel];
+            }
+            else
+            {
+             currentActualForwardSpeed = ForwardSpeed; // Fallback to default inspector value
+             Debug.LogWarning("Could not determine initial level speed, using default ForwardSpeed.");
+             }
+         Debug.Log($"Initial Actual Speed Set To: {currentActualForwardSpeed}");
 
             AssignAnimationIDs();
             _jumpTimeoutDelta = JumpTimeout;
@@ -259,57 +275,68 @@ private void JumpAndGravity()
         // --- END ADD ---
     }
 }
-               private void MovePlayer()
+                  private void MovePlayer()
+    {
+        // --- Update Base Speed ONLY if Potion is NOT Active ---
+        // If the potion effect is not running, check if the base speed needs
+        // to be updated based on the current game level.
+        if (!isPotionActive)
         {
-            // --- Calculate Forward Speed ---
-            float currentForwardSpeed = ForwardSpeed;
-            if (_input.sprint) { currentForwardSpeed *= SprintSpeedMultiplier; }
-
-            // Optional Braking Logic (keep commented out unless needed)
-            // if (_input.move.y < -_threshold)
-            // {
-            //     currentForwardSpeed *= BrakingSpeedMultiplier;
-            // }
-
-
-            // --- Calculate Sideways Speed ---
-            float targetSidewaysSpeed = _input.move.x * SidewaysSpeed;
-            _currentSidewaysSpeed = Mathf.Lerp(_currentSidewaysSpeed, targetSidewaysSpeed, Time.deltaTime * SidewaysSpeedChangeRate);
-
-
-            // --- Combine Movement Vectors ---
-            Vector3 forwardMovement = Vector3.forward * currentForwardSpeed;
-            Vector3 sidewaysMovement = Vector3.right * _currentSidewaysSpeed;
-            Vector3 totalHorizontalMovement = forwardMovement + sidewaysMovement;
-
-
-            // --- CALCULATE FINAL DELTA VECTOR & ADD LOG (Lines Added Here) ---
-            // Calculate the full movement vector including vertical velocity for this frame
-            Vector3 finalMoveDelta = (totalHorizontalMovement + new Vector3(0.0f, _verticalVelocity, 0.0f)) * Time.deltaTime;
-
-            // Log the vertical component being applied just before moving
-            // Log periodically (e.g., every 10 frames) to avoid spamming the console too much
-            if(Time.frameCount % 10 == 0)
+            // Ensure GameManager reference exists and array is valid
+            if (_gameManager != null && forwardSpeedsByLevel != null && forwardSpeedsByLevel.Length > (int)_gameManager.CurrentLevel)
             {
-                // Also log the CharacterController's internal isGrounded for comparison
-                bool ccIsGrounded = _controller.isGrounded;
-                Debug.Log($"[MovePlayer] Applying Y Move: {finalMoveDelta.y:F4} (From VertVel: {_verticalVelocity:F3}) | Current Pos Y: {transform.position.y:F3} | Script Grounded: {Grounded} | CC.isGrounded: {ccIsGrounded}");
+                // Get the designated speed for the current level
+                float levelBaseSpeed = forwardSpeedsByLevel[(int)_gameManager.CurrentLevel];
+
+                // Update the actual speed only if it's different from the target level speed
+                // (Prevents unnecessary assignments every frame)
+                if (Mathf.Abs(currentActualForwardSpeed - levelBaseSpeed) > 0.01f)
+                {
+                    // Debug.Log($"Updating base speed to level {_gameManager.CurrentLevel}: {levelBaseSpeed}");
+                    currentActualForwardSpeed = levelBaseSpeed;
+                }
             }
-            // --- END ADDED LINES ---
-
-
-            // --- Apply Movement ---
-            // Use the calculated finalMoveDelta vector
-            _controller.Move(finalMoveDelta);
-
-
-            // --- Force Player Rotation ---
-            transform.rotation = Quaternion.LookRotation(Vector3.forward);
-
-
-            // --- Update Animator ---
-            HandleAnimationState(currentForwardSpeed, Mathf.Abs(_input.move.x));
+            // If potion IS active, currentActualForwardSpeed is controlled by the coroutine
         }
+        // ------------------------------------------------------
+
+
+        // --- Apply Sprint multiplier to the potentially potion-modified speed ---
+        // Use currentActualForwardSpeed as the base for sprint calculation
+        float speedToUse = _input.sprint ? currentActualForwardSpeed * SprintSpeedMultiplier : currentActualForwardSpeed;
+        // ---------------------------------------------------------------------
+
+
+        // --- Calculate Sideways Speed --- (No change needed)
+        float targetSidewaysSpeed = _input.move.x * SidewaysSpeed;
+        _currentSidewaysSpeed = Mathf.Lerp(_currentSidewaysSpeed, targetSidewaysSpeed, Time.deltaTime * SidewaysSpeedChangeRate);
+
+
+        // --- Combine Movement Vectors --- (No change needed)
+        Vector3 forwardMovement = Vector3.forward * speedToUse; // Use the final calculated speed
+        Vector3 sidewaysMovement = Vector3.right * _currentSidewaysSpeed;
+        Vector3 totalHorizontalMovement = forwardMovement + sidewaysMovement;
+
+
+        // --- Apply Movement --- (No change needed, uses _verticalVelocity)
+        Vector3 finalMoveDelta = (totalHorizontalMovement + new Vector3(0.0f, _verticalVelocity, 0.0f)) * Time.deltaTime;
+        if(Time.frameCount % 10 == 0)
+        {
+             bool ccIsGrounded = _controller.isGrounded;
+             // Log the speed being used for movement
+             Debug.Log($"[MovePlayer] SpeedToUse: {speedToUse:F2} | Applying Y Move: {finalMoveDelta.y:F4} (From VertVel: {_verticalVelocity:F3}) | Current Pos Y: {transform.position.y:F3} | Script Grounded: {Grounded} | CC.isGrounded: {ccIsGrounded}");
+        }
+        _controller.Move(finalMoveDelta);
+
+
+        // --- Force Player Rotation --- (No change needed)
+        transform.rotation = Quaternion.LookRotation(Vector3.forward);
+
+
+        // --- Update Animator ---
+        // Pass the final calculated speed (including sprint/potion) to the animator
+        HandleAnimationState(speedToUse, Mathf.Abs(_input.move.x));
+    }
          private void CameraRotation()
         {
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
@@ -406,23 +433,25 @@ private void JumpAndGravity()
 
         private IEnumerator SpeedJumpBoostCoroutine()
         {
+            if (isPotionActive) yield break;
             isPotionActive = true;
             // Store original values
-            originalSpeed = ForwardSpeed;
+
             originalJumpHeight = JumpHeight;
-
-            // Apply boost
-            ForwardSpeed *= potionSpeedMultiplier;
             JumpHeight *= potionJumpMultiplier;
-            Debug.Log($"POTION Activated! Speed: {ForwardSpeed}, Jump: {JumpHeight}");
 
-            // TODO: Add optional visual/audio feedback for potion start
+             // --- Temporarily Boost the Speed Variable ---
+        float originalSpeedForCoroutine = currentActualForwardSpeed; // Store the speed just before boost
+        currentActualForwardSpeed *= potionSpeedMultiplier; // Directly modify the variable MovePlayer uses
+
+            Debug.Log($"POTION Activated! Speed set to: {currentActualForwardSpeed}, Jump Height: {JumpHeight}");
+
 
             // Wait for the duration
             yield return new WaitForSeconds(potionDuration);
 
             // Restore original values
-            ForwardSpeed = originalSpeed;
+              currentActualForwardSpeed = originalSpeedForCoroutine; 
             JumpHeight = originalJumpHeight;
             isPotionActive = false;
             Debug.Log("POTION Deactivated. Speed/Jump restored.");
