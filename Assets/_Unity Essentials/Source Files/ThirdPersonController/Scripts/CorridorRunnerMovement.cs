@@ -1,13 +1,13 @@
 using UnityEngine;
-using System.Collections; // Required for Coroutines
+using System.Collections; 
 #if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem; // Keep this if StarterAssetsInputs uses it
+using UnityEngine.InputSystem; 
 #endif
 
 namespace StarterAssets // Keep the same namespace if your Inputs script uses it
 {
     [RequireComponent(typeof(CharacterController))]
-    [RequireComponent(typeof(StarterAssetsInputs))] // We rely on this for input values
+    [RequireComponent(typeof(StarterAssetsInputs))] // rely on this for input values
     public class CorridorRunnerMovement : MonoBehaviour
     {
          #region PowerUp Variables
@@ -44,8 +44,6 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         public float SidewaysSpeed = 4.0f;
         public float SprintSpeedMultiplier = 1.5f;
         public float SidewaysSpeedChangeRate = 10.0f;
-        // [Tooltip("Multiplier for forward speed when moving backwards input is held (S key)")] // Optional Braking
-        // public float BrakingSpeedMultiplier = 0.5f; 
         [Header("Level Progression Speed")]
         [Tooltip("Forward speed for each level (Level 1, Level 2, Level 3)")]
         public float[] forwardSpeedsByLevel = new float[3] { 7.0f, 13.0f, 15.0f }; // Default example speeds
@@ -121,7 +119,7 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         {
               _gameManager = FindFirstObjectByType<GameManager>(); 
 
-    // Keep the null check, it's still useful
+
     if (_gameManager == null) {
         Debug.LogWarning("CorridorRunnerMovement: GameManager not found!", this);
     }
@@ -211,12 +209,12 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
                 QueryTriggerInteraction.Ignore
             );
 
-            // --- DEBUG LOG: Log only when the Grounded state CHANGES ---
+            // DEBUG LOG: Log only when the Grounded state CHANGES 
             if (Grounded != isGroundedNow) // Compare current state to the new result
             {
                 Debug.Log($"[GroundedCheck] State Changed. Grounded = {isGroundedNow} at Y={transform.position.y:F3}");
             }
-            // --- END DEBUG LOG ---
+            // END DEBUG 
 
             // Update the main Grounded variable for the rest of the script to use
             Grounded = isGroundedNow;
@@ -235,7 +233,7 @@ private void JumpAndGravity()
         _fallTimeoutDelta = FallTimeout;
         if (_hasAnimator) { _animator.SetBool(_animIDJump, false); _animator.SetBool(_animIDFreeFall, false); }
 
-        // --- MODIFY AND ADD LOG ---
+        // MODIFY AND ADD LOG
         if (_verticalVelocity < 0.0f)
         {
             float previousVertVel = _verticalVelocity; // Store previous value for logging
@@ -244,7 +242,7 @@ private void JumpAndGravity()
             if (Mathf.Abs(previousVertVel - _verticalVelocity) > 0.1f)
                 Debug.Log($"[JumpAndGravity - Grounded] Reset VertVel from {previousVertVel:F3} to: {_verticalVelocity:F3}");
         }
-        // --- END MODIFY ---
+        // END MODIFY
 
         if (_input.jump && _jumpTimeoutDelta <= 0.0f) {
             _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
@@ -263,7 +261,7 @@ private void JumpAndGravity()
         }
         _input.jump = false;
 
-        // --- ADD LOG FOR GRAVITY ---
+        // LOG FOR GRAVITY 
         float previousVertVelGravity = _verticalVelocity; // Store for logging comparison
         // Apply gravity
         if (_verticalVelocity < _terminalVelocity) {
@@ -272,12 +270,12 @@ private void JumpAndGravity()
         // Log periodically while falling
         if(Time.frameCount % 15 == 0) // Log roughly 4 times per second while falling
             Debug.Log($"[JumpAndGravity - Falling] Applying Gravity. VertVel: {_verticalVelocity:F3} (Delta: {_verticalVelocity-previousVertVelGravity:F4})");
-        // --- END ADD ---
+        // END LOG
     }
 }
                   private void MovePlayer()
     {
-        // --- Update Base Speed ONLY if Potion is NOT Active ---
+        //  Update Base Speed ONLY if Potion is NOT Active 
         // If the potion effect is not running, check if the base speed needs
         // to be updated based on the current game level.
         if (!isPotionActive)
@@ -298,27 +296,26 @@ private void JumpAndGravity()
             }
             // If potion IS active, currentActualForwardSpeed is controlled by the coroutine
         }
-        // ------------------------------------------------------
 
 
-        // --- Apply Sprint multiplier to the potentially potion-modified speed ---
+        //  Apply Sprint multiplier to the potentially potion-modified speed
         // Use currentActualForwardSpeed as the base for sprint calculation
         float speedToUse = _input.sprint ? currentActualForwardSpeed * SprintSpeedMultiplier : currentActualForwardSpeed;
         // ---------------------------------------------------------------------
 
 
-        // --- Calculate Sideways Speed --- (No change needed)
+        // Calculate Sideways Speed
         float targetSidewaysSpeed = _input.move.x * SidewaysSpeed;
         _currentSidewaysSpeed = Mathf.Lerp(_currentSidewaysSpeed, targetSidewaysSpeed, Time.deltaTime * SidewaysSpeedChangeRate);
 
 
-        // --- Combine Movement Vectors --- (No change needed)
+        // Combine Movement Vectors
         Vector3 forwardMovement = Vector3.forward * speedToUse; // Use the final calculated speed
         Vector3 sidewaysMovement = Vector3.right * _currentSidewaysSpeed;
         Vector3 totalHorizontalMovement = forwardMovement + sidewaysMovement;
 
 
-        // --- Apply Movement --- (No change needed, uses _verticalVelocity)
+        // Apply Movement, uses _verticalVelocity
         Vector3 finalMoveDelta = (totalHorizontalMovement + new Vector3(0.0f, _verticalVelocity, 0.0f)) * Time.deltaTime;
         if(Time.frameCount % 10 == 0)
         {
@@ -329,11 +326,11 @@ private void JumpAndGravity()
         _controller.Move(finalMoveDelta);
 
 
-        // --- Force Player Rotation --- (No change needed)
+        // Force Player Rotation 
         transform.rotation = Quaternion.LookRotation(Vector3.forward);
 
 
-        // --- Update Animator ---
+        // Update Animator 
         // Pass the final calculated speed (including sprint/potion) to the animator
         HandleAnimationState(speedToUse, Mathf.Abs(_input.move.x));
     }
@@ -421,14 +418,12 @@ private void JumpAndGravity()
 
          #region PowerUp Activation Methods
 
-        // --- POTION ---
         public void ActivateSpeedJumpBoost()
         {
             if (!isPotionActive) // Prevent stacking multiple potions right now
             {
                 StartCoroutine(SpeedJumpBoostCoroutine());
             }
-            // Optional: Could reset timer if already active
         }
 
         private IEnumerator SpeedJumpBoostCoroutine()
@@ -440,7 +435,7 @@ private void JumpAndGravity()
             originalJumpHeight = JumpHeight;
             JumpHeight *= potionJumpMultiplier;
 
-             // --- Temporarily Boost the Speed Variable ---
+             // Temporarily Boost the Speed Variable 
         float originalSpeedForCoroutine = currentActualForwardSpeed; // Store the speed just before boost
         currentActualForwardSpeed *= potionSpeedMultiplier; // Directly modify the variable MovePlayer uses
 
@@ -456,11 +451,8 @@ private void JumpAndGravity()
             isPotionActive = false;
             Debug.Log("POTION Deactivated. Speed/Jump restored.");
 
-            // TODO: Add optional visual/audio feedback for potion end
         }
 
-
-        // --- APPLE ---
         public bool IsCollisionProof => isCollisionProof; // Read-only property
 
 public void ActivateCollisionProof() // Renamed activation method
@@ -478,27 +470,23 @@ private IEnumerator CollisionProofCoroutine()
 
      if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateResistanceON(); // Tell UI effect is active
+            UIManager.Instance.UpdateResistanceON(); 
         }
         else { Debug.LogWarning("UIManager instance not found when trying to call UpdateResistanceON."); }
-        // -----------------
 
-    // TODO: Add visual feedback (e.g., shield effect, color tint?)
 
-    yield return new WaitForSeconds(invulnerabilityDuration); // Use the duration variable
+    yield return new WaitForSeconds(invulnerabilityDuration); 
 
     isCollisionProof = false;
     Debug.Log("APPLE Deactivated. Collisions are deadly again.");
      if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateResistanceOFF(); // Tell UI effect is inactive
+            UIManager.Instance.UpdateResistanceOFF(); 
         }
          else { Debug.LogWarning("UIManager instance not found when trying to call UpdateResistanceOFF."); }
 
-    // TODO: Remove visual feedback
 }
         
-        // --- COIN ---
          public void ActivateCameraAngleChange()
          {
              if (!isCameraPowerUpActive)
@@ -518,11 +506,8 @@ private IEnumerator CollisionProofCoroutine()
             else{
                 CameraAngleOverride -= cameraAnglePowerUpValue; 
             }
-            // Or set directly: CameraAngleOverride = cameraAnglePowerUpValue;
             Debug.Log($"COIN Activated! Camera Angle Override now: {CameraAngleOverride}");
-
-            // TODO: Add camera transition effect? Sound?
-
+            
             yield return new WaitForSeconds(cameraAnglePowerUpDuration);
 
             CameraAngleOverride = originalCameraAngleOverride; // Restore original override

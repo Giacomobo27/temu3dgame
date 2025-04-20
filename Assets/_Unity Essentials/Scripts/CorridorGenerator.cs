@@ -1,18 +1,18 @@
 using UnityEngine;
-using System.Collections.Generic; // Required for using Lists or Queues
+using System.Collections.Generic; 
 
 public class CorridorGenerator : MonoBehaviour
 {
     //public variables
 
     [Header("Level Progression Corridors")]
-[Tooltip("Corridor prefabs for each level (Level 1, Level 2, Level 3)")]
-public GameObject[] corridorPrefabsByLevel = new GameObject[3];
+    [Tooltip("Corridor prefabs for each level (Level 1, Level 2, Level 3)")]
+    public GameObject[] corridorPrefabsByLevel = new GameObject[3];
 
     [Header("PowerUp Settings")] 
-public GameObject[] powerUpPrefabs;
-[Range(0f, 1f)]
-public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
+    public GameObject[] powerUpPrefabs;
+    [Range(0f, 1f)]
+    public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
 
     [Header("Corridor Settings")]
     public GameObject corridorSectionPrefab;
@@ -38,7 +38,6 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     private GameManager gameManager; 
     void Start()
     {
-        // --- Error Checking (Keep this) ---
         if (corridorSectionPrefab == null) {
             Debug.LogError("Corridor Section Prefab is not assigned!", this);
             enabled = false; return;
@@ -58,7 +57,6 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
           if (obstaclePrefabs == null || obstaclePrefabs.Length == 0) {
             Debug.LogWarning("CorridorGenerator: No obstacle prefabs assigned. No obstacles will spawn.", this);
         }
-        // --- End Error Checking ---
 
         gameManager = GameManager.Instance;
      if (gameManager == null) Debug.LogWarning("CorridorGenerator: GameManager not found!", this);
@@ -68,7 +66,7 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
         // Spawn initial sections
         for (int i = 0; i < initialSections; i++)
         {
-            SpawnSection(i == 0); // This will correctly update nextSpawnPosition // i==0  mean no obstacle in the first one
+            SpawnSection(i == 0);  // i==0  mean no obstacle in the first one
         }
         Debug.Log($"Initial spawning complete. Next spawn position Z: {nextSpawnPosition.z}");
     }
@@ -88,26 +86,22 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
         // Check if the player has moved far enough forward
         if (playerTransform.position.z > currentTriggerSpawnZ)
         {
-            Debug.Log($"--- [CorridorGenerator] Triggered Spawn! ---"); // Make sure this logs!
+            Debug.Log($"--- [CorridorGenerator] Triggered Spawn! ---"); 
             SpawnSection();
             DestroyOldestSection();
         }
     }
     void SpawnSection(bool isFirstSection = false)
     {
-
-         // --- Determine Prefab based on Level ---
-    GameObject prefabToSpawn = corridorSectionPrefab; // Default fallback
+    GameObject prefabToSpawn = corridorSectionPrefab; // Default 
 
     if (gameManager != null && corridorPrefabsByLevel != null)
     {
-        // Get the prefab for the current level
-        // Make sure array elements are not null in Inspector!
+     
         GameObject levelPrefab = corridorPrefabsByLevel[(int)gameManager.CurrentLevel];
         if (levelPrefab != null) {
             prefabToSpawn = levelPrefab;
         } else {
-            // Warn if specific level prefab is missing, use default
             Debug.LogWarning($"Corridor prefab for Level {(int)gameManager.CurrentLevel + 1} is not assigned! Using default.", this);
         }
     }
@@ -118,7 +112,7 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     }
 
 
-    if (prefabToSpawn == null) { // Final check if default is also null
+    if (prefabToSpawn == null) { 
         Debug.LogError("No valid corridor prefab found to spawn!", this);
         return;
     }
@@ -126,10 +120,6 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     // Instantiate the chosen section prefab
     GameObject newSection = Instantiate(prefabToSpawn, nextSpawnPosition, Quaternion.identity, transform);
     activeSections.Enqueue(newSection);
-
-
-
-
 
 
         if(!isFirstSection){
@@ -147,8 +137,8 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
 
 
 
-        // --- CRITICAL: Update the position for the *next* section ---
-        Vector3 oldSpawnPos = nextSpawnPosition; // For logging
+        //  Update the position for the next section ---
+        Vector3 oldSpawnPos = nextSpawnPosition; 
         nextSpawnPosition.z += sectionLength;
         Debug.Log($"Spawned section at Z: {oldSpawnPos.z:F2}. Next spawn will be at Z: {nextSpawnPosition.z:F2}");
     }
@@ -156,36 +146,32 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     
      void TrySpawnObstacle(GameObject sectionInstance)
      {
-        // Check if we actually have obstacle prefabs assigned
         if (obstaclePrefabs == null || obstaclePrefabs.Length == 0) {
-             return; // No obstacles to spawn
+             return; 
         }
 
-        // Find all potential spawn points within the newly instantiated section
-        // Using the ObstacleSpawnPoint component marker script
+        // Find all spawn points using the ObstacleSpawnPoint component marker script
         ObstacleSpawnPoint[] spawnPoints = sectionInstance.GetComponentsInChildren<ObstacleSpawnPoint>();
 
         // Check if any spawn points were found in the prefab
         if (spawnPoints == null || spawnPoints.Length == 0) {
             // Debug.LogWarning("No ObstacleSpawnPoint components found in the corridor section prefab.", sectionInstance);
-            return; // No places to spawn obstacles in this section prefab
+            return;
         }
 
-        // --- Spawn Logic ---
-        // 1. Select a random spawn point from the found points
+
+        // Select a random spawn point 
         int spawnIndex = Random.Range(0, spawnPoints.Length);
         Transform spawnTransform = spawnPoints[spawnIndex].transform;
 
-        // 2. Select a random obstacle prefab from the array
+        // Select a random obstacle prefab 
         int prefabIndex = Random.Range(0, obstaclePrefabs.Length);
         GameObject obstacleToSpawn = obstaclePrefabs[prefabIndex];
 
-        // 3. Instantiate the chosen obstacle at the chosen point
+        // Instantiate the chosen obstacle at the chosen point
         if (obstacleToSpawn != null) {
-            // Instantiate the obstacle at the spawn point's position and rotation,
-            // and make it a child of the section so it gets destroyed automatically.
+            // make it a child of the section so it gets destroyed automatically.
             Instantiate(obstacleToSpawn, spawnTransform.position, spawnTransform.rotation, sectionInstance.transform);
-             // Debug.Log($"Spawned obstacle {obstacleToSpawn.name} in section {sectionInstance.name}");
         } else {
              Debug.LogWarning($"Obstacle prefab at index {prefabIndex} is null.");
         }
@@ -196,24 +182,22 @@ public float powerUpSpawnProbability = 0.1f; // Lower chance than obstacles
     // Check if we have power-up prefabs
     if (powerUpPrefabs == null || powerUpPrefabs.Length == 0) return;
 
-    // Find spawn points (reuse obstacle points or make specific ones)
+    // Find spawn points
     ObstacleSpawnPoint[] spawnPoints = sectionInstance.GetComponentsInChildren<ObstacleSpawnPoint>();
     if (spawnPoints == null || spawnPoints.Length == 0) return;
 
-    // --- Spawn Logic ---
-    // 1. Select a random spawn point
-    // CONSIDER: Maybe avoid spawning on the same point as an obstacle? Needs extra logic.
+
+    // Select a random spawn point
     int spawnIndex = Random.Range(0, spawnPoints.Length);
     Transform spawnTransform = spawnPoints[spawnIndex].transform;
 
-    // 2. Select a random power-up prefab
+    // Select a random power-up prefab
     int prefabIndex = Random.Range(0, powerUpPrefabs.Length);
     GameObject powerUpToSpawn = powerUpPrefabs[prefabIndex];
 
-    // 3. Instantiate
+    // Instantiate
     if (powerUpToSpawn != null) {
         Instantiate(powerUpToSpawn, spawnTransform.position, spawnTransform.rotation, sectionInstance.transform);
-         // Debug.Log($"Spawned power-up {powerUpToSpawn.name} in section {sectionInstance.name}");
     } else {
          Debug.LogWarning($"PowerUp prefab at index {prefabIndex} is null.");
     }

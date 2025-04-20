@@ -1,9 +1,8 @@
 using UnityEngine;
-using TMPro; // Required for TextMeshPro UI elements
+using TMPro; 
 
 public class UIManager : MonoBehaviour
 {
-    // --- Singleton Pattern ---
     public static UIManager Instance { get; private set; }
 
     void Awake()
@@ -12,29 +11,22 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
         } else {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // Optional persistence
         }
     }
-    // --- End Singleton ---
 
     [Header("Score Calculation")]
-    // Changed Multiplier meaning
     [Tooltip("Points awarded per second of playtime.")]
-    public float pointsPerSecond = 10.0f; // Example: 10 points per second
+    public float pointsPerSecond = 10.0f;
 
     [Header("UI References")]
     public TextMeshProUGUI scoreTextUI;
     [Header("resistance References")]
     public TextMeshProUGUI rTextUI;
 
-    // Target Reference no longer needed for score calculation
-    // [Header("Target Reference")]
-    // public Transform targetToTrack;
 
     // --- Score Variables ---
     public int CurrentScore { get; private set; }
     private float scoreAccumulator = 0f; // Accumulates fractional score from time
-    // Removed distance tracking variables: lastTrackedZ, isTracking
     private GameManager gameManager; // Cached reference
 
     void Start()
@@ -46,13 +38,10 @@ public class UIManager : MonoBehaviour
             Debug.LogError("UIManager: Score Text UI not assigned!", this);
         }
 
-        // No target tracking needed in Start anymore
-
         ResetScore(); // Initialize score
-        UpdateScoreVisibility(); // Set initial UI visibility
+        UpdateScoreVisibility(); 
     }
 
-    // Renamed Reset method
     public void ResetScore()
     {
          CurrentScore = 0;
@@ -64,7 +53,7 @@ public class UIManager : MonoBehaviour
 
     void Update()
     {
-         UpdateScoreVisibility(); // Keep UI visibility updated
+         UpdateScoreVisibility(); 
 
          // Check if game is playing
          bool isPlaying = (gameManager != null && gameManager.currentState == GameManager.GameState.Playing);
@@ -74,8 +63,7 @@ public class UIManager : MonoBehaviour
             return; // Don't update score if not playing
         }
 
-        // --- Calculate Score based on Time ---
-        // Add points based on time elapsed this frame * points per second
+        // Calculate Score based on Time 
         scoreAccumulator += pointsPerSecond * Time.deltaTime;
 
         // Check if accumulator has enough for at least one whole point
@@ -98,16 +86,15 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Adds points from any source (time, powerups, collectibles)
+    // Adds points from any source 
     public void AddScore(int points)
     {
          // Check game state again just to be safe before modifying score
          bool canScore = (gameManager != null && gameManager.currentState == GameManager.GameState.Playing);
-         if (!canScore || points <= 0) return; // Also ignore adding zero/negative points
+         if (!canScore || points <= 0) return; // ignore adding zero/negative points
 
          CurrentScore += points;
-         UpdateScoreDisplay(); // Update UI whenever score changes
-         // Debug.Log($"Score Added: {points}. New Total Score: {CurrentScore}"); // Optional log
+         UpdateScoreDisplay(); 
     }
 
     // Updates the text display

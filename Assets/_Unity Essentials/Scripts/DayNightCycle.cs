@@ -1,5 +1,9 @@
 using UnityEngine;
 
+
+//useless
+
+
 public class DayNightCycle : MonoBehaviour
 {
     [Tooltip("Duration of a full day-night cycle in real-world seconds.")]

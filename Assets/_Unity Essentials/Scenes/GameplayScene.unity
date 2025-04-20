@@ -469,8 +469,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1671,8 +1671,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -64.600006, y: -122.5}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: -125, y: -123.4}
+  m_SizeDelta: {x: 270, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &565923278
 MonoBehaviour:
@@ -1694,7 +1694,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '  '
+  m_text: '   '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 3d7e4c035915e46d7a4bf4722e72f951, type: 2}
   m_sharedMaterial: {fileID: 21699584260080902, guid: 3d7e4c035915e46d7a4bf4722e72f951,
@@ -1722,8 +1722,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 36
+  m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2139,9 +2139,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 640e64accb5699f4b98f93b0f34dfcd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deathEffectPrefab: {fileID: 0}
-  deathSound: {fileID: 0}
-  powerUpCollectSound: {fileID: 0}
+  deathSound: {fileID: 8300000, guid: f43eb456171c73a4eadfe545b6e911ad, type: 3}
+  powerUpCollectSound: {fileID: 8300000, guid: cb9963dba08d23547892c40ee7a74bbd, type: 3}
 --- !u!1 &756839301
 GameObject:
   m_ObjectHideFlags: 0

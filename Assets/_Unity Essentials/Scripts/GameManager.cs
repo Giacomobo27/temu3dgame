@@ -1,10 +1,9 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Required for reloading the scene
+using UnityEngine.SceneManagement; 
 
 public class GameManager : MonoBehaviour
 {
-    public string gameplaySceneName = "EndScene"; // Assign in Inspector
-    // --- Singleton Pattern ---
+    public string gameplaySceneName = "EndScene"; 
     public static GameManager Instance { get; private set; }
 
     void Awake()
@@ -16,19 +15,17 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // This is the first instance, make it the singleton
+            // This is the first instance
             Instance = this;
-            // Optional: Keep the GameManager across scene loads
-            // DontDestroyOnLoad(gameObject);
+           
         }
     }
-    // --- End Singleton ---
 
 
     public enum GameState
     {
-        Playing,    // Gameplay is active
-        GameOver    // Player has lost
+        Playing,    
+        GameOver    
     }
 
       // 
@@ -42,7 +39,6 @@ public class GameManager : MonoBehaviour
     // Score thresholds for level changes
     public int level2Threshold = 1000;
     public int level3Threshold = 2000;
-    // --- END LEVEL TRACKING ---
 
     [Header("Game State")]
     public GameState currentState = GameState.Playing;
@@ -51,23 +47,18 @@ public class GameManager : MonoBehaviour
 
 
     [Header("Other References")]
-    public GameObject playerObject; // Assign the player GameObject
+    public GameObject playerObject; 
 
 
     void Start()
     {
-        // Initial setup based on the starting state
-        //SetState(GameState.Playing); // Start in the Ready state
          UpdateLevel(true);
 
         if (playerObject == null) {
-             // Try to find the player automatically if not assigned (optional)
             playerObject = GameObject.FindGameObjectWithTag("Player"); // Make sure your player has the "Player" tag
             if (playerObject == null) {
                  Debug.LogError("Player Object is not assigned in GameManager and couldn't be found by tag!", this);
             }
-            // Add lines here to get references to player scripts if needed
-            // playerMovement = playerObject?.GetComponent<PlayerMovement>();
         }
     }
 
@@ -79,13 +70,10 @@ public class GameManager : MonoBehaviour
         {
            
             case GameState.Playing:
-                // Game logic happens here or in other scripts that check this state
-                // For example, player movement script should only work if state is Playing
-                // Check for game over conditions (e.g., player health <= 0)
+                // Game logic in CorridorRunnerMovement
                 break;
 
             case GameState.GameOver:
-                // Check for input to restart the game (e.g., 'R' key)
                 SceneManager.LoadScene(gameplaySceneName);
                
                 break;
@@ -106,15 +94,11 @@ public class GameManager : MonoBehaviour
 
             case GameState.Playing:
                  Time.timeScale = 1f; // Resume game physics and time
-                // Enable player movement script
-                // playerMovement?.SetMovementEnabled(true);
+               
                 break;
 
             case GameState.GameOver:
-                 Time.timeScale = 0f; // Optional: Pause game on game over
-                // Disable player movement script
-                // playerMovement?.SetMovementEnabled(false);
-                // Maybe play a game over sound
+                 Time.timeScale = 0f; 
                 break;
         }
     }
@@ -126,10 +110,8 @@ public class GameManager : MonoBehaviour
     }
 
     
-    // --- ADD UpdateLevel Method ---
     private void UpdateLevel(bool forceUpdate = false)
     {
-        // Check if UIManager exists and we can get the score
         if (UIManager.Instance == null) return;
 
         int score = UIManager.Instance.CurrentScore;
@@ -154,14 +136,11 @@ public class GameManager : MonoBehaviour
         {
             currentLevel = calculatedLevel;
             Debug.Log($"--- Level Changed to: {currentLevel} (Score: {score}) ---");
-            // Optional: Trigger an event here if other scripts need to react instantly
-            // OnLevelChanged?.Invoke(currentLevel);
         }
     }
-    // --- END UpdateLevel Method ---
 
 
-    // Call this method from your player script when it dies/collides
+    // Called this method from PlayerCollisionHandler when it dies/collides
     public void PlayerDied()
     {
         if (currentState == GameState.Playing)
