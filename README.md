@@ -1,5 +1,8 @@
 # TEMU SIMULATION - Ass. 2 3D Game
 
+
+![Alt text](foto.png)
+
 ## Description
 
 This is a fast-paced 3D corridor runner game developed for the **Ass. 2 3D Game** assignment using the Unity Engine. Players control a robot escaping a clandestine laboratory hidden within the London Underground, navigating dynamic obstacles and striving for freedom.
