@@ -28,14 +28,13 @@ However, after becoming sentience, you discovered a dark secret, you're schedule
     *   **A / Left Arrow:** Move Left
     *   **D / Right Arrow:** Move Right
     *   **Spacebar:** Jump
-    *   **Left Shift (Hold):** Sprint (if implemented)
-    *   **Mouse:** Look/Aim Camera
+    *   **Left Shift (Hold):** Sprint 
 *   **Android:**
-    *   [Describe touch controls - e.g., Swipe Left/Right to change lanes, Swipe Up to Jump. Needs implementation.] *(Assignment requires different controls matching the platform)*
+    *   Swipe Left/Right to change lanes, Swipe Up to Jump. Needs implementation.
 
 ## Technology Used
 
-*   **Game Engine:** Unity 
+*   **Game Engine:** Unity 6
 *   **Programming Language:** C#
 *   **Input System:** Unity's Input System package
 *   **Core Gameplay:** Unity CharacterController, Custom C# scripts for movement, generation, game management.
@@ -47,16 +46,7 @@ However, after becoming sentience, you discovered a dark secret, you're schedule
 
 Builds for Windows, Android, and WebGL can be found under the **Releases** tab of this GitHub repository.
 
-*   **Windows:**
-    1.  Download the `.zip` file for the Windows build.
-    2.  Extract the contents of the zip file to a folder on your computer.
-    3.  Run the `.exe` file (e.g., `YourGameTitle.exe`) inside the extracted folder. **Do not move the .exe out of its folder.**
-*   **Android:**
-    1.  Download the `.apk` file.
-    2.  Copy the `.apk` file to your Android device.
-    3.  Using a file manager app on your device, locate and tap the `.apk` file.
-    4.  You may need to allow installation from "Unknown Sources" in your device's security settings.
-    5.  Follow the prompts to install the game.
+*   **Windows, Android**: (not released in this git for size problems)
 *   **WebGL:**
     1.  A playable version is hosted via GitHub Pages here: **https://giacomobo27.github.io/temu3dgame/**
     2.  Simply visit the link in a compatible web browser (Chrome, Firefox, Edge recommended). Loading may take some time.
@@ -64,7 +54,7 @@ Builds for Windows, Android, and WebGL can be found under the **Releases** tab o
 ## Building from Source
 
 1.  Clone this repository.
-2.  Open the project using **Unity Hub** with Unity version **[Specify Version, e.g., 2021.3.16f1]** installed (ensure Android and/or Windows Build Support modules are included).
+2.  Open the project using **Unity Hub** with Unity version 6 installed (ensure Android and/or Windows Build Support modules are included).
 3.  Ensure all necessary scenes (`MainMenuScene`, `GameplayScene`, `GameOverScene`, `LoadingScene` if used) are added to the Build Settings (`File > Build Settings...`) with `MainMenuScene` at index 0.
 4.  Use the Build Settings window to switch to your desired platform (PC or Android) and click "Build" or "Build and Run". Refer to Unity documentation for specific platform build requirements (Android SDK/NDK, Keystores for release, etc.).
 
