@@ -28,12 +28,12 @@ However, after becoming sentience, you discovered a dark secret, you're schedule
 ## Controls
 
 *   **PC (Keyboard & Mouse):**
-    *   **A / Left Arrow:** Move Left
-    *   **D / Right Arrow:** Move Right
+    *   **A:** Move Left
+    *   **D:** Move Right
     *   **Spacebar:** Jump
     *   **Left Shift (Hold):** Sprint 
 *   **Android:**
-    *   Swipe Left/Right to change lanes, Swipe Up to Jump. Needs implementation.
+    *   Swipe Left/Right to change lanes, Swipe Up to Jump.
 
 ## Technology Used
 
@@ -58,7 +58,7 @@ Builds for Windows, Android, and WebGL can be found under the **Releases** tab o
 
 1.  Clone this repository.
 2.  Open the project using **Unity Hub** with Unity version 6 installed (ensure Android and/or Windows Build Support modules are included).
-3.  Ensure all necessary scenes (`MainMenuScene`, `GameplayScene`, `GameOverScene`, `LoadingScene` if used) are added to the Build Settings (`File > Build Settings...`) with `MainMenuScene` at index 0.
+3.  Ensure all necessary scenes (`IntroScene`, `GameplayScene`, `OutroScene` if used) are added to the Build Settings (`File > Build Settings...`) with `MainMenuScene` at index 0.
 4.  Use the Build Settings window to switch to your desired platform (PC or Android) and click "Build" or "Build and Run". Refer to Unity documentation for specific platform build requirements (Android SDK/NDK, Keystores for release, etc.).
 
 ---
