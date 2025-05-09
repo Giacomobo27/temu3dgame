@@ -7,11 +7,12 @@ public class OutroManager : MonoBehaviour
     public string gameplaySceneName = "IntroScene"; // Assign in Inspector
 
     private bool isLoading = false;
-    void Update()
+    
+    // This function handles the actual scene loading logic
+    public void RestartGame()
     {
-        if (!isLoading && (Input.GetMouseButtonDown(0) || Input.anyKeyDown))
-        {
-           if (isLoading) return;
+        // Prevent this from running more than once per attempt
+        if (isLoading) return;
         isLoading = true; // Set the flag
 
         Debug.Log("Start triggered (Any Click/Key). Loading scene: " + gameplaySceneName);
@@ -22,7 +23,6 @@ public class OutroManager : MonoBehaviour
 
         // Load the main gameplay scene using the name assigned in the Inspector
         SceneManager.LoadScene(gameplaySceneName);
-        }
     }
 
 }

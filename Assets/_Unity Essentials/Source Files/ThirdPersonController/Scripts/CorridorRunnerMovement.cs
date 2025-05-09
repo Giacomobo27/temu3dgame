@@ -1,7 +1,8 @@
 using UnityEngine;
 using System.Collections; 
 #if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem; 
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 #endif
 
 namespace StarterAssets // Keep the same namespace if your Inputs script uses it
@@ -49,6 +50,16 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         public float[] forwardSpeedsByLevel = new float[3] { 7.0f, 13.0f, 15.0f }; // Default example speeds
 
         
+        // --- NEW TOUCH CONTROL VARIABLES ---
+        [Header("Touch Control Settings")]
+        [Tooltip("How sensitive horizontal movement is to finger position relative to screen center. Higher = more movement.")]
+        public float horizontalSensitivity = 0.1f; // Adjust this! Might need different scaling
+        [Tooltip("The maximum distance left/right the player can move from the center (X=0).")]
+        public float horizontalBounds = 2.5f;
+        [Tooltip("How quickly the character moves horizontally towards the touch target position.")]
+        public float horizontalMoveSpeed = 15.0f;
+        // --- END NEW TOUCH CONTROL VARIABLES ---
+
 
 
         [Header("Jump and Gravity")]
@@ -78,9 +89,18 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         public AudioClip[] FootstepAudioClips;
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
+        
+[Header("Swipe Settings")] 
+public float minSwipeDistanceY = 80f; 
+public float maxSwipeTime = 0.5f;   
+
         #endregion
 
         #region Private Variables
+      // swipe detection
+        private Vector2 touchStartPosition;
+private float touchStartTime;
+private bool isPotentialSwipe = false; 
 
         // Component References
         private CharacterController _controller;
@@ -99,6 +119,12 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         private float _currentSidewaysSpeed;
         private float currentActualForwardSpeed; // Stores the calculated speed for use by MovePlayer
 
+
+          // --- NEW TOUCH CONTROL STATE ---
+        private float targetXPosition; // Target X based on touch input
+        // --- END NEW TOUCH CONTROL STATE ---
+
+
         // Timeouts
         private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
@@ -114,6 +140,18 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         #endregion
 
         #region Unity Methods (Awake, Start, Update, LateUpdate)
+
+         void OnEnable()
+    {
+        // Enable the Enhanced Touch API
+        EnhancedTouchSupport.Enable();
+    }
+
+    void OnDisable()
+    {
+        // Disable it when the script is disabled or destroyed
+        EnhancedTouchSupport.Disable();
+    }
 
         void Awake()
         {
@@ -150,6 +188,11 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
              }
          Debug.Log($"Initial Actual Speed Set To: {currentActualForwardSpeed}");
 
+          // --- Initialize targetXPosition ---
+            targetXPosition = transform.position.x; // Start at the character's initial X
+            // ---------------------------------
+
+
             AssignAnimationIDs();
             _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
@@ -166,6 +209,10 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
              }
              if (!_controller.enabled) return;
 
+             // --- HANDLE TOUCH HORIZONTAL INPUT ---
+            HandleTouchInput();
+            // ------------------------------------
+
             GroundedCheck();
             JumpAndGravity();
             MovePlayer();
@@ -180,6 +227,87 @@ namespace StarterAssets // Keep the same namespace if your Inputs script uses it
         }
 
         #endregion
+
+
+#region Touch Input Handling
+private void HandleTouchInput()
+{
+    targetXPosition = transform.position.x; // Default to current X if no touch
+    bool jumpInputDetectedThisFrame = false;
+    // Check if there are any active touches detected by EnhancedTouch
+    if (UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches.Count > 0)
+    {
+        // Get the first active touch
+        UnityEngine.InputSystem.EnhancedTouch.Touch activeTouch = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches[0];
+
+        // Check if the touch is currently active (Began, Moved, Stationary)
+        if (activeTouch.phase == UnityEngine.InputSystem.TouchPhase.Began ||
+            activeTouch.phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+            activeTouch.phase == UnityEngine.InputSystem.TouchPhase.Stationary)
+        {
+            // Convert screen X position to world X target
+            float screenXNormalized = activeTouch.screenPosition.x / Screen.width; // Use screenPosition
+            targetXPosition = Mathf.Lerp(-horizontalBounds, horizontalBounds, screenXNormalized);
+
+            // Clamp within bounds
+            targetXPosition = Mathf.Clamp(targetXPosition, -horizontalBounds, horizontalBounds)-3.7f;
+             // --- ADD LOG ---
+            Debug.Log($"Touch Input: ScreenXNorm={screenXNormalized:F3}, TargetX={targetXPosition:F3}, ScreenWidth={Screen.width}");
+            // --- END LOG ---
+            // --- TEMPORARY LOG ---
+    Debug.Log($" AAAAAAAAAAAAAAAAATouch PosX: {activeTouch.screenPosition.x}, ScreenWidth: {Screen.width}, NormX: {screenXNormalized:F3}, TargetX: {targetXPosition:F3}, Bounds: {horizontalBounds}");
+    // --- END LOG ---
+        }
+        // --- Handle Swipe Gesture Detection ---
+        switch (activeTouch.phase)
+        {
+            case UnityEngine.InputSystem.TouchPhase.Began:
+                touchStartPosition = activeTouch.screenPosition;
+                touchStartTime = Time.time;
+                isPotentialSwipe = true;
+                break;
+
+            case UnityEngine.InputSystem.TouchPhase.Ended:
+                if (isPotentialSwipe)
+                {
+                    float swipeTime = Time.time - touchStartTime;
+                    Vector2 swipeDelta = activeTouch.screenPosition - touchStartPosition;
+
+                    if (swipeTime <= maxSwipeTime) // Check time first
+                    {
+                        // Check for UP swipe (prioritize vertical)
+                        if (Mathf.Abs(swipeDelta.y) > Mathf.Abs(swipeDelta.x) &&
+                            swipeDelta.y > minSwipeDistanceY) // Positive Y delta, distance met
+                        {
+                            Debug.Log(">>> Swipe Up Detected (JUMP)");
+                            jumpInputDetectedThisFrame = true;
+                        }
+                        // Optional: Add horizontal SWIPE detection here too if needed,
+                        // checking swipeDelta.x and minSwipeDistanceX
+                    }
+                }
+                isPotentialSwipe = false;
+                break;
+
+            case UnityEngine.InputSystem.TouchPhase.Canceled:
+                isPotentialSwipe = false;
+                break;
+        }
+    }
+
+      if (jumpInputDetectedThisFrame)
+    {
+        _input.JumpInput(true);
+    }
+    // Optional return-to-center logic remains the same:
+    // else
+    // {
+    //    targetXPosition = Mathf.Lerp(transform.position.x, 0f, Time.deltaTime * horizontalMoveSpeed * 0.5f);
+    // }
+}
+        #endregion
+
+
 
         #region Core Logic Methods (Move, Jump/Gravity, GroundedCheck, Camera)
 
@@ -233,7 +361,6 @@ private void JumpAndGravity()
         _fallTimeoutDelta = FallTimeout;
         if (_hasAnimator) { _animator.SetBool(_animIDJump, false); _animator.SetBool(_animIDFreeFall, false); }
 
-        // MODIFY AND ADD LOG
         if (_verticalVelocity < 0.0f)
         {
             float previousVertVel = _verticalVelocity; // Store previous value for logging
@@ -242,7 +369,6 @@ private void JumpAndGravity()
             if (Mathf.Abs(previousVertVel - _verticalVelocity) > 0.1f)
                 Debug.Log($"[JumpAndGravity - Grounded] Reset VertVel from {previousVertVel:F3} to: {_verticalVelocity:F3}");
         }
-        // END MODIFY
 
         if (_input.jump && _jumpTimeoutDelta <= 0.0f) {
             _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
@@ -304,35 +430,54 @@ private void JumpAndGravity()
         // ---------------------------------------------------------------------
 
 
-        // Calculate Sideways Speed
-        float targetSidewaysSpeed = _input.move.x * SidewaysSpeed;
-        _currentSidewaysSpeed = Mathf.Lerp(_currentSidewaysSpeed, targetSidewaysSpeed, Time.deltaTime * SidewaysSpeedChangeRate);
+            // --- Calculate Target Horizontal Position and Smooth ---
+            // This Lerp IS the new sideways movement calculation towards the touch target
+            float smoothedXPosition = Mathf.Lerp(
+                transform.position.x,        // Current X
+                targetXPosition,             // Target X from HandleTouchHorizontalInput
+                Time.deltaTime * horizontalMoveSpeed // Smoothing speed toward target
+            );
 
 
-        // Combine Movement Vectors
-        Vector3 forwardMovement = Vector3.forward * speedToUse; // Use the final calculated speed
-        Vector3 sidewaysMovement = Vector3.right * _currentSidewaysSpeed;
-        Vector3 totalHorizontalMovement = forwardMovement + sidewaysMovement;
+            // --- Combine Movement Vectors ---
+            // Forward movement remains the same
+            Vector3 forwardMovement = Vector3.forward * speedToUse;
+
+            // Calculate the required Y and Z movement delta for this frame
+            Vector3 verticalAndForwardDelta = new Vector3(0.0f, _verticalVelocity, forwardMovement.z) * Time.deltaTime;
 
 
-        // Apply Movement, uses _verticalVelocity
-        Vector3 finalMoveDelta = (totalHorizontalMovement + new Vector3(0.0f, _verticalVelocity, 0.0f)) * Time.deltaTime;
-        if(Time.frameCount % 10 == 0)
-        {
-             bool ccIsGrounded = _controller.isGrounded;
-             // Log the speed being used for movement
-             Debug.Log($"[MovePlayer] SpeedToUse: {speedToUse:F2} | Applying Y Move: {finalMoveDelta.y:F4} (From VertVel: {_verticalVelocity:F3}) | Current Pos Y: {transform.position.y:F3} | Script Grounded: {Grounded} | CC.isGrounded: {ccIsGrounded}");
-        }
-        _controller.Move(finalMoveDelta);
+            // --- Apply Movement Using Character Controller ---
+            // We need to figure out the total position change required this frame
+
+            // 1. Calculate where we *would* be with only Y and Z movement applied
+            Vector3 positionAfterYZ = transform.position + verticalAndForwardDelta;
+
+            // 2. Set the target X position for that potential new location
+            Vector3 targetPositionOverall = new Vector3(smoothedXPosition, positionAfterYZ.y, positionAfterYZ.z);
+
+            // 3. Calculate the difference vector needed to get there from our current position
+            Vector3 requiredTotalDelta = targetPositionOverall - transform.position;
+
+            // 4. Move the controller by that total delta
+            _controller.Move(requiredTotalDelta);
 
 
-        // Force Player Rotation 
-        transform.rotation = Quaternion.LookRotation(Vector3.forward);
+            // --- Debug Log --- (Adjusted to show targetX and smoothedX)
+            if(Time.frameCount % 10 == 0)
+            {
+                 bool ccIsGrounded = _controller.isGrounded;
+                 // Log target X from touch, current X, and the smoothed target X for this frame
+                 Debug.Log($"[MovePlayer] SpeedToUse: {speedToUse:F2} | TargetX: {targetXPosition:F2} | CurrentX: {transform.position.x:F2} | SmoothedX: {smoothedXPosition:F2} | Applying Y Move: {requiredTotalDelta.y:F4} (From VertVel: {_verticalVelocity:F3}) | Current Pos Y: {transform.position.y:F3} | Script Grounded: {Grounded} | CC.isGrounded: {ccIsGrounded}");
+            }
 
 
-        // Update Animator 
-        // Pass the final calculated speed (including sprint/potion) to the animator
-        HandleAnimationState(speedToUse, Mathf.Abs(_input.move.x));
+            // --- Force Player Rotation --- (Keep this)
+            transform.rotation = Quaternion.LookRotation(Vector3.forward);
+
+            // --- Update Animator --- (MotionSpeed reflects how far X is from target?)
+             float sidewaysIntensity = Mathf.Abs(targetXPosition - transform.position.x) / horizontalBounds; // Value from 0 to 1?
+            HandleAnimationState(speedToUse, sidewaysIntensity); // Adjust threshold in HandleAnimationState if needed
     }
          private void CameraRotation()
         {

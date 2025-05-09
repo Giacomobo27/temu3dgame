@@ -2092,7 +2092,7 @@ MonoBehaviour:
   potionJumpMultiplier: 1.5
   potionDuration: 8
   intangibilityDuration: 5
-  cameraAnglePowerUpValue: 60
+  cameraAnglePowerUpValue: 100
   cameraAnglePowerUpDuration: 5
   invulnerabilityDuration: 5
   ForwardSpeed: 7
@@ -2103,12 +2103,15 @@ MonoBehaviour:
   - 7
   - 13
   - 15
+  horizontalSensitivity: 0.1
+  horizontalBounds: 2.5
+  horizontalMoveSpeed: 5
   JumpHeight: 1.8
   Gravity: -20
   JumpTimeout: 0.5
   FallTimeout: 0.15
-  Grounded: 1
-  GroundedOffset: -0.1
+  Grounded: 0
+  GroundedOffset: 0
   GroundedRadius: 0.3
   GroundLayers:
     serializedVersion: 2
@@ -3624,13 +3627,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1260010978}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.1159378, y: -0.008537464, z: -0.0019318737, w: 0.9932179}
-  m_LocalPosition: {x: -3.62, y: 3.264, z: -3.29}
+  m_LocalRotation: {x: 0.11592322, y: -0.0022313935, z: -0.0026679207, w: 0.9932521}
+  m_LocalPosition: {x: -3.823, y: 3.264, z: -3.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 13.313, y: -1.025, z: -0.343}
+  m_LocalEulerAnglesHint: {x: 13.313, y: -0.297, z: -0.343}
 --- !u!114 &1260010980
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3716,7 +3719,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 98
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -6454,7 +6457,7 @@ PrefabInstance:
     - target: {fileID: 7395850293068071823, guid: 57f521d16ae5e4f81953d3d863f3eb91,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.34
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7395850293068071823, guid: 57f521d16ae5e4f81953d3d863f3eb91,
         type: 3}

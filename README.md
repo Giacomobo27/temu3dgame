@@ -1,7 +1,7 @@
 # TEMU SIMULATION - Ass. 2 3D Game
 
 
-![Alt text](foto.png)
+![](foto.png)
 
 ## Description
 
@@ -15,6 +15,8 @@ However, after becoming sentience, you discovered a dark secret, you're schedule
 
 ## Gameplay & Features
 
+![](foto2.png)
+
 *   **Core Mechanic:** Infinite corridor runner style where the player character automatically moves forward.
 *   **Objective:** Survive as long as possible by avoiding obstacles.
 *   **Controls:** Navigate left/right lanes and jump to overcome challenges.
@@ -25,6 +27,7 @@ However, after becoming sentience, you discovered a dark secret, you're schedule
 *   **Player Character:** Features a custom robot model.
 *   **Custom Assets:** Incorporates simple 3D models, london undergound and scene settings designed by the student, potentially using AI-generated textures.
 
+![](foto3.png)
 ## Controls
 
 *   **PC (Keyboard & Mouse):**
